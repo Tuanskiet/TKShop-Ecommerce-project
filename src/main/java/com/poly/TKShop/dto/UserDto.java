@@ -3,6 +3,7 @@ package com.poly.TKShop.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
@@ -11,14 +12,15 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
+
+    @NotNull(message = "username shouldn't be null!")
     private String username;
 
-    @NotBlank
-    @Size(min = 6, max = 10)
+    @NotBlank(message = "password shouldn't be blank!")
+    @Size(min = 6, max = 10, message = "password must between 6 and 10")
     private String password;
 
-    @NotBlank
-    @Size(min = 6, max = 10)
+    @NotBlank(message = "email shouldn't be blank!")
     private String email;
     private boolean enabled ;
 }

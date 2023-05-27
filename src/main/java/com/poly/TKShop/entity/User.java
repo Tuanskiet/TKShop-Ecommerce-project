@@ -16,19 +16,18 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name="users",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"username", "email"})}
-)
+@Table(name="users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int user_id;
 
+    @Column(unique=true, columnDefinition = "username should be unique!")
     private String username;
-
-    private String email;
-
     private String password;
+
+    @Column(unique=true, columnDefinition = "email should be unique!")
+    private String email;
     private boolean enabled ;
 
     @Enumerated(EnumType.STRING)

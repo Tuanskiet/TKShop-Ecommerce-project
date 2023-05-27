@@ -5,11 +5,10 @@ import com.poly.TKShop.converter.UserConvert;
 import com.poly.TKShop.dto.UserDto;
 import com.poly.TKShop.entity.Role;
 import com.poly.TKShop.entity.User;
-import com.poly.TKShop.exception.AppException;
+import com.poly.TKShop.exception.UserNotFoundException;
 import com.poly.TKShop.repository.UserRepository;
 import com.poly.TKShop.service.RoleService;
 import com.poly.TKShop.service.UserService;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -48,9 +47,26 @@ public class UserServiceImpl implements UserService {
             roleSet.add(role_user.get());
             newUser.setRoles(roleSet);
         }else{
-            throw new AppException("Role is not set!");
+            throw new UserNotFoundException("Role is not set!");
         }
         userRepository.save(newUser);
         return userDto;
     }
+
+    @Override
+    public UserDto updateUser(int id, UserDto newUser) {
+        Optional<User> userUpdated = userRepository.findById(id);
+        if(userUpdated.isPresent()){
+            userUpdated.get().setUsername(newUser.getUsername());
+            userUpdated.get().setPassword(passwordEncoder.encode(newUser.getPassword()));
+            userUpdated.get().setEmail(newUser.getEmail());
+            userUpdated.get().setEnabled(newUser.isEnabled());
+        }else{
+            throw new UserNotFoundException("User not found with id : " +  id);
+        }
+        userRepository.save(userUpdated.get());
+        return newUser;
+    }
+//DataIntegrityViolationException
+
 }
