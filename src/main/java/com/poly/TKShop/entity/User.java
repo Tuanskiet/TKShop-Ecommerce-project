@@ -22,11 +22,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int user_id;
 
-    @Column(unique=true, columnDefinition = "username should be unique!")
     private String username;
     private String password;
 
-    @Column(unique=true, columnDefinition = "email should be unique!")
     private String email;
     private boolean enabled ;
 
