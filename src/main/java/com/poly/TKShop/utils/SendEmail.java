@@ -1,20 +1,25 @@
 package com.poly.TKShop.utils;
 
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+@Component
 public class SendEmail {
-    @Autowired
-    private JavaMailSender javaMailSender;
 
-    @Value("${spring.mail.username=}")
+    @Autowired
+    public  JavaMailSender javaMailSender;
+
+    @Value("${spring.mail.username}")
     String FORM_EMAIL;
     final String SUBJECT = "hi hi";
     final String BODY_HTML = "$tokenValue";

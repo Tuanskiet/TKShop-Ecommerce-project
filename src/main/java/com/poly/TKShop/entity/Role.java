@@ -21,4 +21,7 @@ public class Role {
 
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Set<User> users;
+    public Role(String name ){
+        this.name = name;
+    }
 }

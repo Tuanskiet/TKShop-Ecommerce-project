@@ -1,7 +1,7 @@
 package com.poly.TKShop.entity;
 
 
-import com.poly.TKShop.model.AuthenticationProvider;
+import com.poly.TKShop.utils.AuthenticationProvider;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,6 +22,7 @@ public class User {
     private String username;
     private String password;
 
+    @Column(columnDefinition = "VARCHAR(255)")
     private String email;
     private boolean enabled ;
 

@@ -3,19 +3,26 @@ package com.poly.TKShop.service.impl;
 import com.poly.TKShop.config.MyUserDetails;
 import com.poly.TKShop.converter.UserConvert;
 import com.poly.TKShop.dto.UserDto;
+import com.poly.TKShop.entity.ConfirmationToken;
 import com.poly.TKShop.entity.Role;
 import com.poly.TKShop.entity.User;
 import com.poly.TKShop.exception.UserException;
+import com.poly.TKShop.repository.ConfirmationTokenRepository;
+import com.poly.TKShop.repository.RoleRepository;
 import com.poly.TKShop.repository.UserRepository;
 import com.poly.TKShop.service.RoleService;
 import com.poly.TKShop.service.UserService;
+import com.poly.TKShop.utils.SendEmail;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,9 +31,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
     @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    ConfirmationTokenRepository confirmationTokenRepository;
+    @Autowired
     RoleService roleService;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    SendEmail sendEmail;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -54,13 +68,13 @@ public class UserServiceImpl implements UserService {
         User newUser = UserConvert.toUser(userDto);
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         Optional<Role> role_user =  roleService.findByName("ROLE_USER");
-        if(role_user.isPresent()){
-            Set<Role> roleSet = new HashSet<>();
-            roleSet.add(role_user.get());
-            newUser.setRoles(roleSet);
-        }else{
-            throw new UserException("Role is not set!");
+        Set<Role> roleSet = new HashSet<>();
+        if(!role_user.isPresent()){
+            role_user = Optional.of(roleRepository.save(new Role("ROLE_USER")));
+//            throw new UserException("Role is not set!");
         }
+        roleSet.add(role_user.get());
+        newUser.setRoles(roleSet);
         userRepository.save(newUser);
         return userDto;
     }
@@ -95,6 +109,32 @@ public class UserServiceImpl implements UserService {
                 .map(user -> UserConvert.toUserDto(user))
                 .collect(Collectors.toList());
         return userDtoList;
+    }
+
+    @Override
+    public boolean resetPassword(String email) {
+        System.out.println("rm : "+email);
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            String token = UUID.randomUUID().toString();
+            ConfirmationToken confirmationToken = new ConfirmationToken(
+                    token,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusMinutes(10),
+                    user.get()
+            );
+            confirmationTokenRepository.save(confirmationToken);
+            try {
+                System.out.println("email to : " + email);
+                sendEmail.resetPasswordWithToken(email, token);
+            } catch (MessagingException e) {
+                System.out.println(e.getMessage());
+                return false;
+            }
+        }else{
+            throw new UserException("Email not available!");
+        }
+        return true;
     }
 
 }

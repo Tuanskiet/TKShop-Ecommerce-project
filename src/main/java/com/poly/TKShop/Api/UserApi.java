@@ -2,8 +2,7 @@ package com.poly.TKShop.Api;
 
 
 import com.poly.TKShop.dto.UserDto;
-import com.poly.TKShop.entity.User;
-import com.poly.TKShop.model.ResponseObject;
+import com.poly.TKShop.response.ResponseObject;
 import com.poly.TKShop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,8 +67,9 @@ public class UserApi {
 
     @PatchMapping("/reset-password")
     @Operation(summary = "Reset password")
-    public String resetPassword(@RequestBody String email){
-
-        return "sent";
+    public ResponseEntity<?> resetPassword(@RequestBody String email){
+        boolean sent = userService.resetPassword(email);
+        if(!sent) ResponseEntity.internalServerError();
+        return ResponseEntity.ok("sent");
     }
 }

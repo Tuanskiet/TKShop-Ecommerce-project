@@ -1,7 +1,7 @@
 package com.poly.TKShop.advice;
 
 import com.poly.TKShop.exception.UserException;
-import com.poly.TKShop.model.ResponseObject;
+import com.poly.TKShop.response.ResponseObject;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import org.hibernate.exception.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,9 +46,9 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ResponseObject> handleConflict(DataIntegrityViolationException ex){
-        Throwable c = ex.getCause();
-        ConstraintViolationException cv = (ConstraintViolationException) c;
-        System.out.println("d " + cv.getSQLException().getMessage());
+//        Throwable c = ex.getCause();
+//        ConstraintViolationException cv = (ConstraintViolationException) c;
+//        System.out.println("d " + cv.getSQLException().getMessage());
         ResponseObject responseObject = new ResponseObject(
                 "false",
                 "Duplicate entry",
