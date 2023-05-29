@@ -22,9 +22,8 @@ public class ApiExceptionHandler {
     public ResponseEntity<ResponseObject> handleUserException(UserException userException){
         ResponseObject responseObject = new ResponseObject(
                 "false",
-                "Duplicate entry",
+                "user problem",
                 userException.getMessage()
-
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
     }

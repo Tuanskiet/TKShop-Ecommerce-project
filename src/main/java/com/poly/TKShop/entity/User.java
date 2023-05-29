@@ -1,13 +1,10 @@
 package com.poly.TKShop.entity;
 
 
+import com.poly.TKShop.model.AuthenticationProvider;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -32,7 +29,7 @@ public class User {
     @Column(name="auth_provider")
     private AuthenticationProvider authenticationProvider;
 
-    @ManyToMany( fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany( fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(
             name="users_roles",
             joinColumns = @JoinColumn(name="user_id"),

@@ -1,4 +1,4 @@
-package com.poly.TKShop.entity;
+package com.poly.TKShop.model;
 
 public enum AuthenticationProvider {
     LOCAL, GITHUB

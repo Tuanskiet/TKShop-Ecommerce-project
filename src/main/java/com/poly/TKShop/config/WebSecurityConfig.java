@@ -6,6 +6,7 @@ package com.poly.TKShop.config;
 import com.poly.TKShop.hander.EmployeeAuthenticationSuccessHandler;
 import com.poly.TKShop.service.CustomOAuth2UserService;
 import com.poly.TKShop.service.impl.UserServiceImpl;
+import com.poly.TKShop.utils.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,8 +49,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("oauth2/**", "/**").permitAll()
-                    .antMatchers("/api/v1/hi", "/h2-console/**", "/login").permitAll()
+                    .antMatchers("oauth2/**").permitAll()
+                    .antMatchers("/api/v1/**").permitAll()
+                   .antMatchers(SecurityConstants.LOGIN_URL).permitAll()
                     .antMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN") //role admin
                     .anyRequest().authenticated() //cac req còn lại phải auth
                 .and().formLogin()

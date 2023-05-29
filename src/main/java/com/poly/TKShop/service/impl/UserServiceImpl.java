@@ -9,15 +9,15 @@ import com.poly.TKShop.exception.UserException;
 import com.poly.TKShop.repository.UserRepository;
 import com.poly.TKShop.service.RoleService;
 import com.poly.TKShop.service.UserService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -69,6 +69,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(int id, UserDto newUser) {
         Optional<User> userUpdated = userRepository.findById(id);
         if(userUpdated.isPresent()){
+            BeanUtils.copyProperties(newUser, userUpdated);
             userUpdated.get().setUsername(newUser.getUsername());
             userUpdated.get().setPassword(passwordEncoder.encode(newUser.getPassword()));
             userUpdated.get().setEmail(newUser.getEmail());
@@ -79,6 +80,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userUpdated.get());
         return newUser;
     }
-//DataIntegrityViolationException
+
+    @Override
+    public void deleteUser(int id) {
+        Optional<User> user = userRepository.findById(id);
+        if(!user.isPresent()){
+            throw new UserException("User not found with id : " +  id);
+        }
+        userRepository.deleteById(id);
+    }
+    @Override
+    public List<UserDto> getAllUsers() {
+        List<UserDto> userDtoList = userRepository.findAll().stream()
+                .map(user -> UserConvert.toUserDto(user))
+                .collect(Collectors.toList());
+        return userDtoList;
+    }
 
 }

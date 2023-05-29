@@ -9,17 +9,32 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/account")
+@EnableGlobalMethodSecurity(
+        prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true)
 public class UserApi {
     @Autowired
     UserService userService;
 
+    @GetMapping("/getAllUsers")
+    @Operation(summary = "get all users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> getAllUsers(){
+        List<UserDto> listUsers = userService.getAllUsers();
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(new ResponseObject("ok", "get all user successfully",
+                        listUsers != null ? listUsers : "No users found!"));
+    }
 
     @PostMapping("/new")
     @Operation(summary="Create new Account/User", description="Create new user/ Sign up")
@@ -39,5 +54,22 @@ public class UserApi {
         UserDto newUser = userService.updateUser(id, userDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseObject("ok", "updated", newUser));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "delete user", description = "delete user by id")
+    public ResponseEntity<ResponseObject> deleteUser(
+            @PathVariable(name = "id") int id){
+        //do something
+        userService.deleteUser(id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseObject("ok", "delete user successfully", "ID user deleted : "+ id));
+    }
+
+    @PatchMapping("/reset-password")
+    @Operation(summary = "Reset password")
+    public String resetPassword(@RequestBody String email){
+
+        return "sent";
     }
 }
