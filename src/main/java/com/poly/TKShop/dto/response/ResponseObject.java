@@ -1,4 +1,4 @@
-package com.poly.TKShop.response;
+package com.poly.TKShop.dto.response;
 
 import lombok.*;
 

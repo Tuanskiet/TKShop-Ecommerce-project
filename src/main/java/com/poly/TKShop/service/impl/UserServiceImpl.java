@@ -3,23 +3,23 @@ package com.poly.TKShop.service.impl;
 import com.poly.TKShop.config.MyUserDetails;
 import com.poly.TKShop.converter.UserConvert;
 import com.poly.TKShop.dto.UserDto;
-import com.poly.TKShop.entity.ConfirmationToken;
 import com.poly.TKShop.entity.Role;
 import com.poly.TKShop.entity.User;
 import com.poly.TKShop.exception.UserException;
-import com.poly.TKShop.repository.ConfirmationTokenRepository;
 import com.poly.TKShop.repository.RoleRepository;
 import com.poly.TKShop.repository.UserRepository;
 import com.poly.TKShop.service.RoleService;
 import com.poly.TKShop.service.UserService;
 import com.poly.TKShop.utils.SendEmail;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
@@ -27,19 +27,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    ConfirmationTokenRepository confirmationTokenRepository;
-    @Autowired
-    RoleService roleService;
-    @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
-    SendEmail sendEmail;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+    private  SendEmail sendEmail;
 
 
     @Override
@@ -55,13 +51,13 @@ public class UserServiceImpl implements UserService {
     public UserDto createNewUser(UserDto userDto) {
         Optional<User> findUserByUsername = userRepository.findByUsername(userDto.getUsername());
         if(findUserByUsername.isPresent()){
-            System.out.println("user taken");
+           log.info("user is taken");
             throw new UserException("Username already taken!");
         }
 
         Optional<User> findUserByEmail = userRepository.findByEmail(userDto.getEmail());
         if(findUserByEmail.isPresent()){
-            System.out.println("email taken");
+            log.info("email taken");
             throw new  UserException("Email already taken!");
         }
 
@@ -70,15 +66,13 @@ public class UserServiceImpl implements UserService {
         Optional<Role> role_user =  roleService.findByName("ROLE_USER");
         Set<Role> roleSet = new HashSet<>();
         if(!role_user.isPresent()){
-            role_user = Optional.of(roleRepository.save(new Role("ROLE_USER")));
-//            throw new UserException("Role is not set!");
+            role_user = Optional.of(roleRepository.save(new Role(null,"ROLE_USER")));
         }
         roleSet.add(role_user.get());
         newUser.setRoles(roleSet);
         userRepository.save(newUser);
         return userDto;
     }
-
     @Override
     public UserDto updateUser(int id, UserDto newUser) {
         Optional<User> userUpdated = userRepository.findById(id);
@@ -117,13 +111,13 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByEmail(email);
         if(user.isPresent()){
             String token = UUID.randomUUID().toString();
-            ConfirmationToken confirmationToken = new ConfirmationToken(
-                    token,
-                    LocalDateTime.now(),
-                    LocalDateTime.now().plusMinutes(10),
-                    user.get()
-            );
-            confirmationTokenRepository.save(confirmationToken);
+//            ConfirmationToken confirmationToken = new ConfirmationToken(
+//                    token,
+//                    LocalDateTime.now(),
+//                    LocalDateTime.now().plusMinutes(10),
+//                    user.get()
+//            );
+//            confirmationTokenRepository.save(confirmationToken);
             try {
                 System.out.println("email to : " + email);
                 sendEmail.resetPasswordWithToken(email, token);
@@ -137,4 +131,25 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    @Override
+    public boolean verifyEmail(String token) {
+        boolean resultValue = false;
+//        Optional<ConfirmationToken> confirmationToken = confirmationTokenRepository.findByToken(token);
+//        if(confirmationToken.isPresent()){
+//            LocalDateTime timeExpired = confirmationToken.get().getExpiredAt();
+//            if(timeExpired.isBefore(LocalDateTime.now())){
+//                System.out.println("token is expired !");
+//            }else{
+//                resultValue = true;
+//            }
+//        }
+        return resultValue;
+    }
+
+    @Override
+    public boolean updateNewPassword(String email, String newPassword) {
+        String newPasswordEncode = passwordEncoder.encode(newPassword);
+        userRepository.updateNewPassword(email, newPasswordEncode);
+        return false;
+    }
 }

@@ -1,18 +1,21 @@
-package com.poly.TKShop.advice;
+package com.poly.TKShop.hander.advice;
 
+import com.poly.TKShop.exception.RoleException;
 import com.poly.TKShop.exception.UserException;
-import com.poly.TKShop.response.ResponseObject;
+import com.poly.TKShop.dto.response.ResponseObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.hibernate.exception.ConstraintViolationException;
+
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -23,6 +26,16 @@ public class ApiExceptionHandler {
                 "false",
                 "user problem",
                 userException.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
+    }
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(RoleException.class)
+    public ResponseEntity<ResponseObject> handleRoleException(RoleException roleException){
+        ResponseObject responseObject = new ResponseObject(
+                "false",
+                "role problem",
+                roleException.getMessage()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
     }
@@ -39,7 +52,6 @@ public class ApiExceptionHandler {
                 "validated fail",
                 errorMap
         );
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseObject);
     }
 
@@ -58,6 +70,16 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(responseObject);
     }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseObject> accessDeniedException(AccessDeniedException ex) throws AccessDeniedException {
+        ResponseObject responseObject = new ResponseObject(
+                "false",
+                "Access is denied",
+                ex.getMessage()
+        );
 
+        return ResponseEntity.status(403)
+                .body(responseObject);
+    }
 
 }

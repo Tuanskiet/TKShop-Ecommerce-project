@@ -6,14 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-@Component
+@Service
 public class SendEmail {
 
     @Autowired
@@ -22,7 +22,8 @@ public class SendEmail {
     @Value("${spring.mail.username}")
     String FORM_EMAIL;
     final String SUBJECT = "hi hi";
-    final String BODY_HTML = "$tokenValue";
+    final String BODY_HTML =
+            "<a href='http://localhost:8888/verify-token?token=$tokenValue'> Click here to verify you email!</a>";
     final String BODY_TEXT = "";
 
     public void sendMailHtml(String toEmail, String body) throws MessagingException {
@@ -52,7 +53,8 @@ public class SendEmail {
     }
 
     public void resetPasswordWithToken( String toEmail, String token) throws MessagingException {
-        String htmlBodyWithToken = BODY_HTML.replace("$tokenValue", token);
+        String htmlBodyWithToken = BODY_HTML.replace("$tokenValue", token.trim());
+//                                            .replace("$domain", SecurityConstants.MY_DOMAIN.trim());
         this.sendMailHtml(toEmail, htmlBodyWithToken);
     }
 }

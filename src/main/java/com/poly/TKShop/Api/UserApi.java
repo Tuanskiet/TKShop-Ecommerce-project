@@ -2,7 +2,7 @@ package com.poly.TKShop.Api;
 
 
 import com.poly.TKShop.dto.UserDto;
-import com.poly.TKShop.response.ResponseObject;
+import com.poly.TKShop.dto.response.ResponseObject;
 import com.poly.TKShop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class UserApi {
     @Autowired
     UserService userService;
 
-    @GetMapping("/getAllUsers")
+    @GetMapping("/users")
     @Operation(summary = "get all users")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseObject> getAllUsers(){
@@ -67,9 +69,12 @@ public class UserApi {
 
     @PatchMapping("/reset-password")
     @Operation(summary = "Reset password")
-    public ResponseEntity<?> resetPassword(@RequestBody String email){
+    public ResponseEntity<?> resetPassword(@RequestBody String email, HttpServletRequest request){
+        request.getSession().setAttribute("email", email);
         boolean sent = userService.resetPassword(email);
         if(!sent) ResponseEntity.internalServerError();
         return ResponseEntity.ok("sent");
     }
+
+
 }
