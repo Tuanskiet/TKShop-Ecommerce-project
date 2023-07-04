@@ -1,5 +1,6 @@
 package com.poly.TKShop.hander.advice;
 
+import com.poly.TKShop.exception.AppException;
 import com.poly.TKShop.exception.RoleException;
 import com.poly.TKShop.exception.UserException;
 import com.poly.TKShop.dto.response.ResponseObject;
@@ -18,6 +19,16 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ResponseObject> handleAppException(AppException appException){
+        ResponseObject responseObject = new ResponseObject(
+                "false",
+                "",
+                appException.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseObject);
+    }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(UserException.class)
@@ -39,7 +50,6 @@ public class ApiExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseObject);
     }
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ResponseObject> handleMeMethodArgumentNotValid(MethodArgumentNotValidException ex){
@@ -54,7 +64,6 @@ public class ApiExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseObject);
     }
-
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ResponseObject> handleConflict(DataIntegrityViolationException ex){
@@ -70,16 +79,16 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(responseObject);
     }
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ResponseObject> accessDeniedException(AccessDeniedException ex) throws AccessDeniedException {
-        ResponseObject responseObject = new ResponseObject(
-                "false",
-                "Access is denied",
-                ex.getMessage()
-        );
-
-        return ResponseEntity.status(403)
-                .body(responseObject);
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<ResponseObject> accessDeniedException(AccessDeniedException ex) throws AccessDeniedException {
+//        ResponseObject responseObject = new ResponseObject(
+//                "false",
+//                "Access is denied",
+//                ex.getMessage()
+//        );
+//
+//        return ResponseEntity.status(403)
+//                .body(responseObject);
+//    }
 
 }
